@@ -21,19 +21,14 @@ const useStyles = makeStyles({
 function Nav() {
     const classes = useStyles();
     const history = useHistory();
-    const [value, setValue] = useState('today')
 
-    const handleNavigation = (event, newValue) => {
-        setValue(newValue);
+    const handleNavigation = (e, v) => {
+        history.push(`/${v}`)
     }
-
-    useEffect(() => {
-        history.push(`/${value}`)
-    })
 
     return (
         <div className={classes.root}>
-            <BottomNavigation value={value} onChange={handleNavigation} showLabels>
+            <BottomNavigation onChange={handleNavigation} showLabels>
                 <BottomNavigationAction label="Today" icon={<TodayIcon />} value='today'/>
                 <BottomNavigationAction label="New" icon={<AddCircleIcon />} value='new-expense'/>
                 <BottomNavigationAction label="History" icon={<HistoryIcon />} value='history'/>

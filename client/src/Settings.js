@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-
 import { makeStyles } from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import axios from 'axios';
 
 const useStyles = makeStyles({
     root: {
@@ -22,27 +21,33 @@ const useStyles = makeStyles({
     }
 })
 
-function Settings({ totalMoney, setTotalMoney, objectiveInAMonth, setObjectiveInAMonth }) {
+function Settings({ totalMoney, currentDate }) {
     const classes = useStyles();
     const [currentTotalMoney, setCurrentTotalMoney] = useState('');
-    const [currentObjectiveInAMonth, setCurrentObjectiveInAMonth] = useState('');
+    const [currentGoal, setCurrentGoal] = useState('');
     const [openTotalMoneyDialog, setOpenTotalMoneyDialog] = useState(false);
     const [openObjectiveDialog, setOpenObjectiveDialog] = useState(false);
 
     const handleCurrentTotalMoneyChange = e => {
         setCurrentTotalMoney(e.target.value)
     }
-    const handleTotalMoneyChange = () => {
-        setTotalMoney(currentTotalMoney);
+    const handleTotalMoneyChange = async () => {
+        await axios.post('http://localhost:5000/api/totalMoney', {amount: currentTotalMoney});
         setCurrentTotalMoney('');
         handleClose();
     }
-    const handleCurrentObjectiveInAMonthChange = e => {
-        setCurrentObjectiveInAMonth(e.target.value);
+    const handleCurrentGoalChange = e => {
+        setCurrentGoal(e.target.value);
     }
-    const handleObjectiveInAMonthChange = () => {
-        setObjectiveInAMonth(currentObjectiveInAMonth);
-        setCurrentObjectiveInAMonth('');
+    const handleGoalChange = async () => {
+        await axios.post('http://localhost:5000/api/goal', {
+            goal: currentGoal,
+            date: {
+                year: currentDate.year,
+                month: currentDate.month
+            }
+        })
+        setCurrentGoal('');
         handleClose();
     }
     const handleOpenTotalMoneyDialog = () => {
@@ -67,7 +72,7 @@ function Settings({ totalMoney, setTotalMoney, objectiveInAMonth, setObjectiveIn
         <div className={classes.root}>
             <h1>Settings</h1>
 
-            <p>{`Your total money is ${totalMoney}.`}</p>
+            <p>{`Your total money is ${totalMoney.amount}.`}</p>
             <Button onClick={handleOpenTotalMoneyDialog} variant='contained'>Change total money</Button>
             <Dialog open={openTotalMoneyDialog} onClose={handleClose} className={classes.dialog}>
             <ValidatorForm className={classes.form} onSubmit={handleTotalMoneyChange} className={classes.dialogContent}>
@@ -84,15 +89,15 @@ function Settings({ totalMoney, setTotalMoney, objectiveInAMonth, setObjectiveIn
             </ValidatorForm>
             </Dialog>
 
-            <p>{`Your objective in a month is ${objectiveInAMonth}.`}</p>
+            <p>{`Your objective in a month is ${currentGoal}.`}</p>
             <Button onClick={handleOpenObjectiveDialog} variant='contained'>Change objective</Button>
             <Dialog open={openObjectiveDialog} onClose={handleClose} className={classes.dialog}>
-            <ValidatorForm className={classes.form} onSubmit={handleObjectiveInAMonthChange} className={classes.dialogContent}>
+            <ValidatorForm className={classes.form} onSubmit={handleGoalChange} className={classes.dialogContent}>
                 <DialogTitle>Change objective</DialogTitle>
                 <TextValidator 
                   label='Objective in a Month' 
-                  value={currentObjectiveInAMonth}
-                  onChange={handleCurrentObjectiveInAMonthChange}
+                  value={currentGoal}
+                  onChange={handleCurrentGoalChange}
                   validators={['isANumber']}
                   errorMessages={['Must be a number!']}
                 />
