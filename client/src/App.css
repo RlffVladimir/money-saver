@@ -1,4 +1,8 @@
 html, body {
   margin: 0;
-  height: 100%;
+  background-color: rgb(198, 212, 212);
+}
+
+.button i.fa{
+  pointer-events: 'none';
 }

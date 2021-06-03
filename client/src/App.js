@@ -1,111 +1,43 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
-import axios from 'axios';
+import { makeStyles } from '@material-ui/core/styles';
+import Nav from './nav/Nav';
+import Page from './components/Page';
+import Today from './pages/Today';
+import Expenses from './pages/Expenses'
+import Welcome from './pages/Welcome';
+import NewExpense from './components/NewExpense';
+import { LanguageProvider } from './contexts/LanguageContext';
 
-import Nav from './Nav';
-import Page from './Page';
-import Today from './Today';
-import Settings from './Settings';
-import NewExpense from './NewExpense';
-import History from './History';
-import Button from '@material-ui/core/Button';
+const useStyles = makeStyles((theme) => ({
+  root: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
 
+}))
 
-// const seedExpenses = [
-//   {
-//       date: '1st March',
-//       category: 'food',
-//       amount: '3000'
-//   },
-//   {
-//       date: '2nd March',
-//       category: 'transport',
-//       amount: '400'
-//   },
-//   {
-//       date: '3rd March',
-//       category: 'food',
-//       amount: '1500'
-//   },
-// ]
-
-
-
-function App() {
-  const [totalMoney, setTotalMoney] = useState('');
-  const [monthGoal, setMonthGoal] = useState('');
-  const [expenses, setExpenses] = useState('');
-  const [currentDate, setCurrentDate] = useState({});  
-
-  const fetchData = async () => {
-    const totalMoneyRes = await axios.get('http://localhost:5000/api/totalMoney');
-    setTotalMoney({amount: totalMoneyRes.data[0].amount});
-  }
-
-  
-
-  useEffect(() => {
-    fetchDate();
-    fetchMonthGoal();
-    fetchExpenses();
-  }, [])
-
-  const fetchDate = () => {
-    let today = new Date();
-    const day = String(today.getDate());
-    const month = String(today.getMonth() + 1); //January is 0!
-    const year = String(today.getFullYear());
-    today = year + '/' + month + '/' + day;
-    setCurrentDate({
-      year,
-      month,
-      day
-    })
-  }
-
-  const fetchMonthGoal = async () => {
-    const monthGoalRes = await axios.get('http://localhost:5000/api/goal');
-    const currentMonthGoal = monthGoalRes.data.filter(monthGoal => {
-      return monthGoal.date.month == currentDate.month && monthGoal.date.year == currentDate.year;
-    })[0];
-    setMonthGoal(currentMonthGoal);
-  }
-
-  const fetchExpenses = async () => {
-    const expensesRes = await axios.get('http://localhost:5000/api/expenses');
-    console.log(expensesRes.data);
-    setExpenses(expensesRes.data);
-  }
-  
+function App({ user, setUser, setToken }) {
+  const classes = useStyles();
+  const [page, setPage] = useState('welcome')
 
   return (
-    <div className="App">
-      <Router>
-        <Switch>
-          <Route exact path='/'>
-            <Page><Today totalMoney={totalMoney} monthGoal={monthGoal} currentDate={currentDate} /></Page>
-          </Route>
-          <Route exact path='/settings'>
-            <Page><Settings
-              totalMoney={totalMoney}
-              monthGoal={monthGoal}
-              currentDate={currentDate}
-            />
-            </Page>
-          </Route>
-          <Route exact path='/new-expense'>
-            <Page><NewExpense expenses={expenses} currentDate={currentDate} /></Page>
-          </Route>
-          <Route exact path='/history'>
-            <Page><History /></Page>
-          </Route>
-          <Route exact >
-            <Page><Today totalMoney={totalMoney} monthGoal={monthGoal} currentDate={currentDate} /></Page>
-          </Route>
-        </Switch>
-        <Nav />
-      </Router>
+    <div className={classes.app}>
+      <LanguageProvider>
+          <Router>
+            <Nav user={user} setUser={setUser} setToken={setToken} setPage={setPage} page={page} welcome={true} />
+            <Switch>
+              <Page>
+                <Route exact path='/' component={Welcome} />
+                <Route exact path='/today' component={Today} />
+                <Route exact path='/expenses' component={Expenses} />
+              </Page>
+            </Switch>
+            <NewExpense />
+          </Router>
+      </LanguageProvider>
     </div>
   );
 }

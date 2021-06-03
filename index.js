@@ -1,27 +1,35 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const totalMoneyRoutes = require('./routes/totalMoneyRoutes');
-const goalRoutes = require('./routes/goalRoutes');
-const expensesRoutes = require('./routes/expensesRoutes')
+if (process.env.NODE_ENV !== "production") {
+    require('dotenv').config();
+}
 
+const express = require('express');
+const mongoose = require('mongoose');
+const dbUrl = process.env.DB_URL;
 const app = express();
 
-mongoose.connect('mongodb://localhost/money-saver', {useNewUrlParser: true, useUnifiedTopology: true});
+// 'mongodb://localhost/money-saver'
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: false }))
+mongoose.connect(dbUrl, {useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false});
+
+app.use(express.json());
 app.use((req, res, next) => {
-    res.set('Access-Control-Allow-Origin', 'http://localhost:3000');
+    // res.set('Access-Control-Allow-Origin', 'https://moneysaver.orloffvladimir.com/api/');
+    res.set('Access-Control-Allow-Origin', '*');
+
     res.set('Access-Control-Allow-Credentials', 'true');
-    res.set('Access-Control-Allow-Methods', 'GET, POST', 'PUT')
-    res.set('Access-Control-Allow-Headers', 'Content-Type')
+    res.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
+    res.set('Access-Control-Allow-Headers', 'Content-Type, x-auth-token')
     next();
 })
 
-app.use('/api/totalMoney', totalMoneyRoutes);
-app.use('/api/goal', goalRoutes);
-app.use('/api/expenses', expensesRoutes);
+//ROUTES
+app.use('/api/totalMoney', require('./routes/totalMoneyRoutes'));
+app.use('/api/goal', require('./routes/goalRoutes'));
+app.use('/api/expenses', require('./routes/expensesRoutes'));
+app.use('/api/user', require('./routes/userRoutes'));
+//ROUTES
+
+
 
 const port = 5000;
 app.listen(port, () => {

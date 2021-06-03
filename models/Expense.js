@@ -1,13 +1,37 @@
 const mongoose = require('mongoose');
+const {Schema} = mongoose;
 
-const expenseSchema = new mongoose.Schema({
-    amount: Number,
-    category: String,
+const ExpenseSchema = new Schema({
+    amount: {
+        type: Number,
+        require: true
+    },
+    productName: {
+        type: String,
+        require: true
+    },
     date: {
-        year: Number,
-        month: String,
-        day: Number
+        year: {
+            type: Number,
+            require: true
+        },
+        month: {
+            type: Number,
+            require: true
+        },
+        day: {
+            type: Number,
+            require: true
+        }
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: 'User'
+    },
+    purchaser: {
+        type: Schema.Types.ObjectId,
+        ref: 'Name',
     }
 });
 
-module.exports = mongoose.model('Expense', expenseSchema);
+module.exports = mongoose.model('Expense', ExpenseSchema);

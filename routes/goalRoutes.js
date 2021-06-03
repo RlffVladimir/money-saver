@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Goal = require('../models/Goal');
+const auth = require('../middleware/auth');
 
 router
   .get('/', async (req, res) => {
@@ -15,12 +16,20 @@ router
   })
   .post('/', async (req, res) => {
     try {
+      const existingGoals = await Goal.deleteMany({
+        user: req.body.user, 
+        date: {
+          year: req.body.date.year, 
+          month: req.body.date.month
+      }})
+      console.log(existingGoals)
       const goal = new Goal({
         goal: req.body.goal,
         date: {
           year: req.body.date.year,
           month: req.body.date.month
-        }
+        },
+        user: req.body.user
       })
       await goal.save();
       res.send(goal);
@@ -45,7 +54,8 @@ router
             date: {
               year: req.body.date.year,
               month: req.body.date.month
-            }
+            },
+            user: req.body.user
         })
         res.send(goal);
       } catch (err) {
